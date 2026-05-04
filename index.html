@@ -2,41 +2,79 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Récupération de données</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse des Données Navigateur</title>
     <style>
-        #resultat {
-            padding: 15px;
-            background: #f4f4f4;
-            border-radius: 5px;
-            font-family: monospace;
-            white-space: pre-wrap;
-        }
+        body { font-family: sans-serif; background: #f4f4f9; color: #333; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .data-group { margin-bottom: 20px; }
+        .data-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
+        .label { font-weight: bold; color: #7f8c8d; }
+        .value { color: #e67e22; word-break: break-all; }
+        .warning { font-size: 0.8em; color: #e74c3c; font-style: italic; }
     </style>
 </head>
 <body>
 
-    <h2>Données récupérées :</h2>
-    <div id="resultat">Chargement en cours...</div>
+<div class="container">
+    <h1>Données récupérées via JS</h1>
+    <p class="warning">Note : Ces informations sont accessibles par n'importe quel site que vous visitez.</p>
+    
+    <div id="results">
+        </div>
+</div>
 
-    <script>
-        async function chargerContenu() {
-            const url = "https://ehzytc47d72qn354j3lbwwce75dw1mpb.oastify.com/github";
-            const conteneur = document.getElementById('resultat');
-
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error("Erreur de réseau");
-                
-                const data = await response.text();
-                conteneur.textContent = data;
-            } catch (error) {
-                conteneur.textContent = "Impossible de charger les données : " + error.message;
-                conteneur.style.color = "red";
+<script>
+    const getInfo = async () => {
+        const data = {
+            "Système & Matériel": {
+                "Plateforme": navigator.platform,
+                "Cœurs CPU": navigator.hardwareConcurrency || "Inconnu",
+                "Mémoire Vive (RAM)": navigator.deviceMemory ? navigator.deviceMemory + " GB" : "Inconnu",
+                "Langue": navigator.language,
+                "User Agent": navigator.userAgent
+            },
+            "Écran & Affichage": {
+                "Résolution": `${screen.width}x${screen.height}`,
+                "Fenêtre utile": `${window.innerWidth}x${window.innerHeight}`,
+                "Profondeur de couleur": screen.colorDepth + " bits",
+                "Ratio de pixels": window.devicePixelRatio
+            },
+            "Navigation & Temps": {
+                "Fuseau horaire": Intl.DateTimeFormat().resolvedOptions().timeZone,
+                "Referrer": document.referrer || "Direct / Aucun",
+                "Cookies activés": navigator.cookieEnabled ? "Oui" : "Non",
+                "Do Not Track": navigator.doNotTrack === "1" ? "Activé" : "Désactivé"
             }
+        };
+
+        // Tentative de récupération de la batterie
+        if (navigator.getBattery) {
+            const battery = await navigator.getBattery();
+            data["Énergie"] = {
+                "Niveau de batterie": (battery.level * 100) + "%",
+                "En charge": battery.charging ? "Oui" : "Non"
+            };
         }
 
-        // Exécuter la fonction au chargement
-        chargerContenu();
-    </script>
+        renderData(data);
+    };
+
+    function renderData(data) {
+        const container = document.getElementById('results');
+        for (const [section, items] of Object.entries(data)) {
+            let html = `<div class="data-group"><h3>${section}</h3>`;
+            for (const [key, value] of Object.entries(items)) {
+                html += `<div class="data-item"><span class="label">${key}</span><span class="value">${value}</span></div>`;
+            }
+            html += `</div>`;
+            container.innerHTML += html;
+        }
+    }
+
+    window.onload = getInfo;
+</script>
+
 </body>
 </html>
