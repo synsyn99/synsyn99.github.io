@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Récupération de données</title>
+    <style>
+        #resultat {
+            padding: 15px;
+            background: #f4f4f4;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Données récupérées :</h2>
+    <div id="resultat">Chargement en cours...</div>
+
+    <script>
+        async function chargerContenu() {
+            const url = "https://ehzytc47d72qn354j3lbwwce75dw1mpb.oastify.com/github";
+            const conteneur = document.getElementById('resultat');
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Erreur de réseau");
+                
+                const data = await response.text();
+                conteneur.textContent = data;
+            } catch (error) {
+                conteneur.textContent = "Impossible de charger les données : " + error.message;
+                conteneur.style.color = "red";
+            }
+        }
+
+        // Exécuter la fonction au chargement
+        chargerContenu();
+    </script>
+</body>
+</html>
